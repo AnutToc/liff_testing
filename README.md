@@ -1,1 +1,1 @@
-This Project is testing for LIFF
+This Project for LIFF connection testing
