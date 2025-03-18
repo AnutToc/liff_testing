@@ -21,18 +21,18 @@
                     const profile = await liff.getProfile();
                     console.log(profile);
 
-                    // Send user data to Django
                     fetch("http://127.0.0.1:8000/api/save_user/", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            userId: profile.userId,
+                            userId: profile.userId,         // 🔹 Ensure correct key names
                             displayName: profile.displayName,
                             pictureUrl: profile.pictureUrl
                         })
                     })
                     .then(response => response.json())
-                    .then(data => console.log(data.message));
+                    .then(data => console.log("Server Response:", data))
+                    .catch(error => console.error("Fetch Error:", error));                    
                 }
             } catch (error) {
                 console.error("LIFF Initialization Error:", error);
