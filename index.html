@@ -16,30 +16,25 @@
                 await liff.init({ liffId: "2007077479-NrWEaQbL" });
 
                 if (!liff.isLoggedIn()) {
-                    liff.login();
-                } else {
-                    liff.getProfile().then(function (profile) {
-                    const res = 'test_image_name';
-
-                    liff.sendMessages([
-                        {
-                        type: 'image',
-                        originalContentUrl: 'https://' + document.domain + '/imgs/' + res + '.jpg',
-                        previewImageUrl: 'https://' + document.domain + '/imgs/' + res + '_240.jpg'
-                        },
-                        {
-                        type: 'text',
-                        text: 'From:' + profile.displayName
-                        }
-                    ]).then(function () {
-                        liff.closeWindow();
-                    }).catch(function (error) {
-                        window.alert('Error sending message: ' + error.message);
-                    });
-                    }).catch(function (error) {
-                        window.alert("Error getting profile: " + error.message);
-                    });
+                    liff.login({ redirectUri: window.location.href });
+                    return;
                 }
+
+                const profile = await liff.getProfile();
+                console.log(profile);
+
+                fetch("http://127.0.0.1:8000/api/save_user/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userId: profile.userId,
+                        displayName: profile.displayName,
+                        pictureUrl: profile.pictureUrl
+                    })
+                })
+                .then(response => response.json())
+                .then(data => console.log("Server Response:", data))
+                .catch(error => console.error("Fetch Error:", error));
             } catch (error) {
                 console.error("LIFF Initialization Error:", error);
             }
@@ -47,4 +42,3 @@
     </script>
 </body>
 </html>
-
