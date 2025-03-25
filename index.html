@@ -5,10 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LIFF App</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+    <style>
+        .container {
+            margin: 20px;
+        }
+        .user-info {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #06c755;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #049c42;
+        }
+    </style>
 </head>
 <body>
-    <h1>LIFF App</h1>
-    <button onclick="initializeLIFF()">Login with LINE</button>
+    <div class="container">
+        <h1>LIFF App</h1>
+        <button onclick="initializeLIFF()">Login with LINE</button>
+        <button onclick="getOdooUser()">Get Odoo User</button>
+        
+        <div id="odooUserInfo" class="user-info">
+            <h2>ข้อมูลผู้ใช้ Odoo</h2>
+            <pre id="odooData"></pre>
+        </div>
+    </div>
 
     <script>
         async function initializeLIFF() {
@@ -25,7 +57,9 @@
 
                 fetch("http://127.0.0.1:8000/api/save_user/", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
                     body: JSON.stringify({
                         userId: profile.userId,
                         displayName: profile.displayName,
@@ -34,10 +68,34 @@
                 })
                 .then(response => response.json())
                 .then(data => console.log("Server Response:", data))
-                .catch(error => console.error("Fetch Error:", error));
+                .catch(error => console.error("Fetch Error:", error));                
             } catch (error) {
                 console.error("LIFF Initialization Error:", error);
             }
+        }
+
+        function getOdooUser() {
+            document.getElementById('odooData').textContent = "กำลังโหลดข้อมูล...";
+            document.getElementById('odooUserInfo').style.display = 'block';
+            
+            fetch("http://127.0.0.1:8000/api/odoo/users/")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("การเชื่อมต่อกับเซิร์ฟเวอร์ล้มเหลว");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        document.getElementById('odooData').textContent = JSON.stringify(data, null, 2);
+                    } else {
+                        document.getElementById('odooData').textContent = "ไม่พบข้อมูลผู้ใช้";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching Odoo user:", error);
+                    document.getElementById('odooData').textContent = "เกิดข้อผิดพลาด: " + error.message;
+                });
         }
     </script>
 </body>
