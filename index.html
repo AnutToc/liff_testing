@@ -78,7 +78,7 @@
             document.getElementById('odooData').textContent = "กำลังโหลดข้อมูล...";
             document.getElementById('odooUserInfo').style.display = 'block';
             
-            fetch("http://127.0.0.1:8000/api/odoo/users/")
+            fetch("http://127.0.0.1:8000/api/odoo/users")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error("การเชื่อมต่อกับเซิร์ฟเวอร์ล้มเหลว");
