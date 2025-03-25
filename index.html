@@ -16,6 +16,20 @@
             border-radius: 5px;
             display: none;
         }
+        .line-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        .profile-details {
+            flex: 1;
+        }
         button {
             padding: 10px 15px;
             margin: 5px;
@@ -28,6 +42,21 @@
         button:hover {
             background-color: #049c42;
         }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -35,6 +64,18 @@
         <h1>LIFF App</h1>
         <button onclick="initializeLIFF()">Login with LINE</button>
         <button onclick="getOdooUser()">Get Odoo User</button>
+        
+        <div id="lineUserInfo" class="user-info">
+            <h2>ข้อมูลโปรไฟล์ LINE</h2>
+            <div class="line-profile">
+                <img id="profileImage" src="" alt="Profile" class="profile-img">
+                <div class="profile-details">
+                    <h3 id="displayName"></h3>
+                    <p>User ID: <span id="userId"></span></p>
+                    <div id="saveStatus"></div>
+                </div>
+            </div>
+        </div>
         
         <div id="odooUserInfo" class="user-info">
             <h2>ข้อมูลผู้ใช้ Odoo</h2>
@@ -54,6 +95,11 @@
 
                 const profile = await liff.getProfile();
                 console.log(profile);
+                
+                document.getElementById('profileImage').src = profile.pictureUrl || "https://via.placeholder.com/80";
+                document.getElementById('displayName').textContent = profile.displayName;
+                document.getElementById('userId').textContent = profile.userId;
+                document.getElementById('lineUserInfo').style.display = 'block';
 
                 fetch("http://127.0.0.1:8000/api/users/save", {
                     method: "POST",
@@ -67,10 +113,21 @@
                     })
                 })
                 .then(response => response.json())
-                .then(data => console.log("Server Response:", data))
-                .catch(error => console.error("Fetch Error:", error));                
+                .then(data => {
+                    console.log("Server Response:", data);
+                    const saveStatus = document.getElementById('saveStatus');
+                    saveStatus.textContent = data.message || "บันทึกข้อมูลสำเร็จ";
+                    saveStatus.className = "status success";
+                })
+                .catch(error => {
+                    console.error("Fetch Error:", error);
+                    const saveStatus = document.getElementById('saveStatus');
+                    saveStatus.textContent = "เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message;
+                    saveStatus.className = "status error";
+                });                
             } catch (error) {
                 console.error("LIFF Initialization Error:", error);
+                alert("เกิดข้อผิดพลาดในการเริ่มต้น LIFF: " + error.message);
             }
         }
 
@@ -97,6 +154,21 @@
                     document.getElementById('odooData').textContent = "เกิดข้อผิดพลาด: " + error.message;
                 });
         }
+        
+        window.onload = async function() {
+            try {
+                await liff.init({ liffId: "2007077479-NrWEaQbL" });
+                if (liff.isLoggedIn()) {
+                    const profile = await liff.getProfile();
+                    document.getElementById('profileImage').src = profile.pictureUrl || "https://via.placeholder.com/80";
+                    document.getElementById('displayName').textContent = profile.displayName;
+                    document.getElementById('userId').textContent = profile.userId;
+                    document.getElementById('lineUserInfo').style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Error checking login status:", error);
+            }
+        };
     </script>
 </body>
 </html>
