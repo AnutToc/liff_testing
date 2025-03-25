@@ -55,7 +55,7 @@
                 const profile = await liff.getProfile();
                 console.log(profile);
 
-                fetch("http://127.0.0.1:8000/api/save_user/", {
+                fetch("http://127.0.0.1:8000/api/users/save", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
