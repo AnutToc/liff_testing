@@ -57,6 +57,16 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -64,6 +74,20 @@
         <h1>LIFF App</h1>
         <button onclick="initializeLIFF()">Login with LINE</button>
         <button onclick="getOdooUser()">Get Odoo User</button>
+        
+        <div id="odooLoginForm" class="user-info">
+            <h2>เข้าสู่ระบบ Odoo</h2>
+            <div class="form-group">
+                <label for="odooUsername">ชื่อผู้ใช้:</label>
+                <input type="text" id="odooUsername" name="odooUsername" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="odooPassword">รหัสผ่าน:</label>
+                <input type="password" id="odooPassword" name="odooPassword" class="form-control">
+            </div>
+            <button onclick="loginToOdoo()">เข้าสู่ระบบ Odoo</button>
+            <div id="odooLoginStatus"></div>
+        </div>
         
         <div id="lineUserInfo" class="user-info">
             <h2>ข้อมูลโปรไฟล์ LINE</h2>
@@ -169,6 +193,57 @@
                 console.error("Error checking login status:", error);
             }
         };
+
+        function loginToOdoo() {
+            const username = document.getElementById('odooUsername').value;
+            const password = document.getElementById('odooPassword').value;
+            
+            if (!username || !password) {
+                const loginStatus = document.getElementById('odooLoginStatus');
+                loginStatus.textContent = "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน";
+                loginStatus.className = "status error";
+                return;
+            }
+            
+            document.getElementById('odooLoginStatus').textContent = "กำลังเข้าสู่ระบบ...";
+            
+            fetch("http://127.0.0.1:8000/api/odoo/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("การเชื่อมต่อกับเซิร์ฟเวอร์ล้มเหลว");
+                }
+                return response.json();
+            })
+            .then(data => {
+                const loginStatus = document.getElementById('odooLoginStatus');
+                if (data.success) {
+                    loginStatus.textContent = "เข้าสู่ระบบสำเร็จ";
+                    loginStatus.className = "status success";
+                    
+                    // แสดงข้อมูลผู้ใช้ Odoo หลังจากเข้าสู่ระบบสำเร็จ
+                    document.getElementById('odooData').textContent = JSON.stringify(data.user, null, 2);
+                    document.getElementById('odooUserInfo').style.display = 'block';
+                } else {
+                    loginStatus.textContent = data.message || "เข้าสู่ระบบล้มเหลว";
+                    loginStatus.className = "status error";
+                }
+            })
+            .catch(error => {
+                console.error("Error logging in to Odoo:", error);
+                const loginStatus = document.getElementById('odooLoginStatus');
+                loginStatus.textContent = "เกิดข้อผิดพลาด: " + error.message;
+                loginStatus.className = "status error";
+            });
+        }
     </script>
 </body>
 </html>
