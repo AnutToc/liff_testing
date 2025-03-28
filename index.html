@@ -85,9 +85,14 @@
                 <input type="password" id="odooPassword" name="odooPassword" class="form-control">
             </div>
             <div class="form-group">
-                <label for="employeeName">ชื่อพนักงาน:</label>
+                <label for="employeeId">รหัสพนักงาน (ถ้ามี):</label>
+                <input type="number" id="employeeId" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="employeeName">ชื่อพนักงาน (ถ้าไม่มี ID):</label>
                 <input type="text" id="employeeName" class="form-control" />
             </div>
+            
             <button onclick="getOdooUser()">ค้นหาข้อมูลพนักงาน</button>
             <button onclick="loginToOdoo()">เข้าสู่ระบบ Odoo</button>
             <div id="odooLoginStatus"></div>
@@ -189,22 +194,29 @@
         function getOdooUser() {
             const username = document.getElementById("odooUsername").value;
             const password = document.getElementById("odooPassword").value;
+            const employeeId = document.getElementById("employeeId").value;
             const employeeName = document.getElementById("employeeName").value;
-
-            if (!username || !password || !employeeName) {
-                showStatus("odooLoginStatus", "กรุณากรอกข้อมูลให้ครบ", "error");
+        
+            if (!username || !password) {
+                showStatus("odooLoginStatus", "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน", "error");
                 return;
             }
-
+        
+            if (!employeeId && !employeeName) {
+                showStatus("odooLoginStatus", "กรุณากรอกชื่อพนักงานหรือรหัสพนักงาน", "error");
+                return;
+            }
+        
             showStatus("odooLoginStatus", "กำลังค้นหาข้อมูลผู้ใช้...", "");
-
+        
             fetch("http://127.0.0.1:8000/api/odoo/users", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                username: username,
-                password: password,
-                employee_name: employeeName
+                    username: username,
+                    password: password,
+                    employee_id: employeeId || null,
+                    employee_name: employeeName || null
                 })
             })
             .then(res => res.json())
@@ -216,7 +228,7 @@
                 document.getElementById("odooData").textContent = "เกิดข้อผิดพลาด: " + error.message;
             });
         }
-    
+        
         function showStatus(id, message, statusClass) {
             const el = document.getElementById(id);
             el.textContent = message;
