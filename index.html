@@ -72,7 +72,6 @@
     <div class="container">
         <h1>LIFF App</h1>
         <button onclick="initializeLIFF()">Login with LINE</button>
-        <!-- <button onclick="getOdooUser()">Get Odoo User</button> -->
         
         <div id="odooLoginForm" class="user-info">
             <h2>เข้าสู่ระบบ Odoo</h2>
@@ -84,6 +83,10 @@
                 <label for="odooPassword">รหัสผ่าน:</label>
                 <input type="password" id="odooPassword" name="odooPassword" class="form-control">
             </div>
+            <button onclick="loginToOdoo()">เข้าสู่ระบบ Odoo</button>
+            <div id="odooLoginStatus"></div>
+        </div>
+        <div id="odooGetInfoForm" class="user-info"></div>
             <div class="form-group">
                 <label for="employeeId">รหัสพนักงาน (ถ้ามี):</label>
                 <input type="number" id="employeeId" class="form-control" />
@@ -92,10 +95,20 @@
                 <label for="employeeName">ชื่อพนักงาน (ถ้าไม่มี ID):</label>
                 <input type="text" id="employeeName" class="form-control" />
             </div>
-            
             <button onclick="getOdooUser()">ค้นหาข้อมูลพนักงาน</button>
-            <button onclick="loginToOdoo()">เข้าสู่ระบบ Odoo</button>
-            <div id="odooLoginStatus"></div>
+        </div>
+        <div id="approvePOForm" class="user-info">
+            <h2>อนุมัติใบสั่งซื้อ (PO)</h2>
+            <div class="form-group">
+                <label for="poId">รหัสใบสั่งซื้อ (PO ID):</label>
+                <input type="text" id="poId" name="poId" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="poName">ชื่อใบสั่งซื้อ (PO Name):</label>
+                <input type="text" id="poName" name="poName" class="form-control">
+            </div>
+            <button onclick="approvePO()">อนุมัติใบสั่งซื้อ</button>
+            <div id="approveStatus"></div>
         </div>
         
         <div id="lineUserInfo" class="user-info">
@@ -226,6 +239,46 @@
             })
             .catch(error => {
                 document.getElementById("odooData").textContent = "เกิดข้อผิดพลาด: " + error.message;
+            });
+        }
+        function approvePO() {
+            const username = document.getElementById("odooUsername").value;
+            const password = document.getElementById("odooPassword").value;
+            const poId = document.getElementById("poId").value;
+            const poName = document.getElementById("poName").value;
+            
+            if (!username || !password) {
+                showStatus("approveStatus", "กรุณาเข้าสู่ระบบ Odoo ก่อนอนุมัติใบสั่งซื้อ", "error");
+                return;
+            }
+            
+            if (!poId && !poName) {
+                showStatus("approveStatus", "กรุณากรอกรหัสใบสั่งซื้อหรือชื่อใบสั่งซื้อ", "error");
+                return;
+            }
+            
+            showStatus("approveStatus", "กำลังดำเนินการอนุมัติใบสั่งซื้อ...", "");
+            
+            fetch("http://127.0.0.1:8000/api/odoo/approve_po", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    po_id: poId || null,
+                    po_name: poName || null
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showStatus("approveStatus", "อนุมัติใบสั่งซื้อสำเร็จ", "success");
+                } else {
+                    showStatus("approveStatus", data.message || "เกิดข้อผิดพลาดในการอนุมัติใบสั่งซื้อ", "error");
+                }
+            })
+            .catch(error => {
+                showStatus("approveStatus", "เกิดข้อผิดพลาด: " + error.message, "error");
             });
         }
         
