@@ -137,6 +137,14 @@
         <div id="approvePOForm" class="user-info">
             <h2>อนุมัติใบสั่งซื้อ (PO)</h2>
             <div class="form-group">
+                <label for="session_id">Session ID:</label>
+                <input type="text" id="session_id" name="session_id" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="user_id">User ID:</label>
+                <input type="text" id="user_id" name="user_id" class="form-control">
+            </div>
+            <div class="form-group">
                 <label for="poId">รหัสใบสั่งซื้อ (PO ID):</label>
                 <input type="text" id="poId" name="poId" class="form-control">
             </div>
@@ -308,8 +316,8 @@
             });
         }
         function approvePO() {
-            const username = document.getElementById("odooUsername").value;
-            const password = document.getElementById("odooPassword").value;
+            const session_id = document.getElementById("session_id").value;
+            const user_id = document.getElementById("user_id").value;
             const poId = document.getElementById("poId").value;
             const poName = document.getElementById("poName").value;
             
@@ -329,8 +337,8 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    username: username,
-                    password: password,
+                    session_id: session_id,
+                    user_id: user_id,
                     po_id: poId || null,
                     po_name: poName || null
                 })
