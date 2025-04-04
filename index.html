@@ -73,6 +73,18 @@
         <h1>LIFF App</h1>
         <button onclick="initializeLIFF()">Login with LINE</button>
         
+        <div id="lineUserInfo" class="user-info">
+            <h2>ข้อมูลโปรไฟล์ LINE</h2>
+            <div class="line-profile">
+                <img id="profileImage" src="" alt="Profile" class="profile-img">
+                <div class="profile-details">
+                    <h3 id="displayName"></h3>
+                    <p>User ID: <span id="userId"></span></p>
+                    <div id="saveStatus"></div>
+                </div>
+            </div>
+        </div>
+
         <div id="odooLoginForm" class="user-info">
             <h2>เข้าสู่ระบบ Odoo</h2>
             <div class="form-group">
@@ -86,17 +98,12 @@
             <button onclick="loginToOdoo()">เข้าสู่ระบบ Odoo</button>
             <div id="odooLoginStatus"></div>
         </div>
-        <div id="odooGetInfoForm" class="user-info"></div>
-            <div class="form-group">
-                <label for="employeeId">รหัสพนักงาน (ถ้ามี):</label>
-                <input type="number" id="employeeId" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label for="employeeName">ชื่อพนักงาน (ถ้าไม่มี ID):</label>
-                <input type="text" id="employeeName" class="form-control" />
-            </div>
-            <button onclick="getOdooUser()">ค้นหาข้อมูลพนักงาน</button>
+
+        <div id="odooUserInfo" class="user-info">
+            <h2>ข้อมูลผู้ใช้ Odoo</h2>
+            <pre id="odooData"></pre>
         </div>
+
         <div id="approvePOForm" class="user-info">
             <h2>อนุมัติใบสั่งซื้อ (PO)</h2>
             <div class="form-group">
@@ -109,23 +116,6 @@
             </div>
             <button onclick="approvePO()">อนุมัติใบสั่งซื้อ</button>
             <div id="approveStatus"></div>
-        </div>
-        
-        <div id="lineUserInfo" class="user-info">
-            <h2>ข้อมูลโปรไฟล์ LINE</h2>
-            <div class="line-profile">
-                <img id="profileImage" src="" alt="Profile" class="profile-img">
-                <div class="profile-details">
-                    <h3 id="displayName"></h3>
-                    <p>User ID: <span id="userId"></span></p>
-                    <div id="saveStatus"></div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="odooUserInfo" class="user-info">
-            <h2>ข้อมูลผู้ใช้ Odoo</h2>
-            <pre id="odooData"></pre>
         </div>
     </div>
 
@@ -147,7 +137,7 @@
                 document.getElementById('userId').textContent = profile.userId;
                 document.getElementById('lineUserInfo').style.display = 'block';
 
-                fetch("http://127.0.0.1:8000/api/users/save", {
+                fetch("http://127.0.0.1:8000/api/line/users/save", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
