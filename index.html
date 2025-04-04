@@ -330,7 +330,7 @@
             const poId = document.getElementById("poId").value;
             const poName = document.getElementById("poName").value;
             
-            if (!username || !password) {
+            if (!session_id || !user_id) {
                 showStatus("approveStatus", "กรุณาเข้าสู่ระบบ Odoo ก่อนอนุมัติใบสั่งซื้อ", "error");
                 return;
             }
@@ -352,16 +352,23 @@
                     po_name: poName || null
                 })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showStatus("approveStatus", "อนุมัติใบสั่งซื้อสำเร็จ", "success");
-                } else {
-                    showStatus("approveStatus", data.message || "เกิดข้อผิดพลาดในการอนุมัติใบสั่งซื้อ", "error");
+            .then(async (res) => {
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        showStatus("approveStatus", "อนุมัติใบสั่งซื้อสำเร็จ", "success");
+                    } else {
+                        showStatus("approveStatus", data.message || "เกิดข้อผิดพลาดในการอนุมัติใบสั่งซื้อ", "error");
+                    }
+                } catch (error) {
+                    console.error("JSON Parse Error:", text);
+                    showStatus("approveStatus", "เซิร์ฟเวอร์ส่งกลับข้อมูลที่ไม่ถูกต้อง", "error");
                 }
             })
             .catch(error => {
-                showStatus("approveStatus", "เกิดข้อผิดพลาด: " + error.message, "error");
+                console.error("Fetch Error:", error);
+                showStatus("approveStatus", "เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์", "error");
             });
         }
         
